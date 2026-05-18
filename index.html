@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home Gym Trainer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --surface2: #1e1e1e;
+      --border: #2a2a2a;
+      --border2: #333;
+      --text: #f0ede8;
+      --text2: #999;
+      --text3: #555;
+      --accent: #c8f55a;
+      --accent2: #a8d43a;
+      --push: #ff6b4a;
+      --pull: #7b8cff;
+      --legs: #4adb8a;
+      --upper: #ffb547;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Layout ── */
+    .app { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      gap: 1rem;
+    }
+    .header-left h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+    .header-left h1 span { color: var(--accent); }
+    .header-left p { font-size: 13px; color: var(--text2); margin-top: 4px; font-family: 'DM Mono', monospace; }
+
+    /* ── Streak Banner ── */
+    .streak-banner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .streak-item { display: flex; align-items: center; gap: 8px; }
+    .streak-num {
+      font-size: 32px;
+      font-weight: 800;
+      font-family: 'DM Mono', monospace;
+      line-height: 1;
+    }
+    .streak-num.fire { color: var(--accent); }
+    .streak-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; line-height: 1.3; }
+    .streak-divider { width: 1px; height: 40px; background: var(--border); }
+
+    /* ── Streak Calendar ── */
+    .streak-calendar {
+      display: flex;
+      gap: 4px;
+      margin-left: auto;
+      flex-wrap: wrap;
+    }
+    .streak-dot {
+      width: 20px; height: 20px;
+      border-radius: 4px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+      position: relative;
+    }
+    .streak-dot.done { background: var(--accent); border-color: var(--accent); }
+    .streak-dot.today { border-color: var(--accent); border-width: 2px; }
+
+    /* ── Stats Row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+    }
+    .stat-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; font-family: 'DM Mono', monospace; }
+    .stat-val { font-size: 26px; font-weight: 800; color: var(--text); font-family: 'DM Mono', monospace; }
+    .stat-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      gap: 2px;
+      margin-bottom: 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px;
+    }
+    .tab {
+      flex: 1;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: 'Syne', sans-serif;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text2);
+      border-radius: var(--radius-sm);
+      transition: all 0.15s;
+      text-align: center;
+    }
+    .tab.active { background: var(--surface2); color: var(--text); }
+    .tab:hover:not(.active) { color: var(--text); }
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* ── Day Grid ── */
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+    .day-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .day-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--day-color, transparent);
+      transition: all 0.15s;
+    }
+    .day-card:hover { border-color: var(--border2); }
+    .day-card.active { border-color: var(--day-color, var(--accent)); }
+    .day-card.completed .day-complete-badge { display: flex; }
+    .day-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; font-family: 'DM Mono', monospace; }
+    .day-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .day-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10px; padding: 3px 7px;
+      border-radius: 999px;
+      font-family: 'DM Mono', monospace;
+      background: color-mix(in srgb, var(--day-color) 15%, transparent);
+      color: var(--day-color);
+    }
+    .day-complete-badge {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      margin-top: 6px;
+      font-size: 10px;
+      color: var(--accent);
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ── Detail Panel ── */
+    .detail-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+    .detail-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .detail-title { font-size: 20px; font-weight: 800; }
+    .detail-meta { font-size: 12px; color: var(--text2); margin-top: 3px; font-family: 'DM Mono', monospace; }
+
+    .complete-day-btn {
+      padding: 9px 18px;
+      background: var(--accent);
+      color: #0d0d0d;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'Syne', sans-serif;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .complete-day-btn:hover { background: var(--accent2); transform: translateY(-1px); }
+    .complete-day-btn.done { background: var(--surface2); color: var(--accent); border: 1px solid var(--accent); }
+
+    /* ── Exercise Table Header ── */
+    .ex-table-header {
+      display: grid;
+      grid-template-columns: 2fr 70px 80px 90px 80px;
+      gap: 8px;
+      padding: 6px 12px;
+      margin-bottom: 4px;
+    }
+    .ex-table-header span { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; font-family: 'DM Mono', monospace; }
+
+    /* ── Exercise Row ── */
+    .exercises-list { display: flex; flex-direction: column; gap: 6px; }
+    .exercise-row {
+      display: grid;
+      grid-template-columns: 2fr 70px 80px 90px 80px;
+      gap: 8px;
+      align-items: center;
+      padding: 12px;
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      transition: border-color 0.15s;
+    }
+    .exercise-row.all-done { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+    .ex-name { font-size: 13px; font-weight: 600; color: var(--text); }
+    .ex-equip { font-size: 11px; color: var(--text3); margin-top: 2px; font-family: 'DM Mono', monospace; }
+    .ex-val { font-size: 13px; color: var(--text2); font-family: 'DM Mono', monospace; }
+
+    /* ── Set Counter ── */
+    .set-counter {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .counter-btn {
+      width: 26px; height: 26px;
+      border-radius: 6px;
+      border: 1px solid var(--border2);
+      background: var(--surface);
+      color: var(--text2);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.12s;
+      font-family: 'DM Mono', monospace;
+      line-height: 1;
+    }
+    .counter-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .counter-btn.plus:hover { background: var(--accent); color: #0d0d0d; border-color: var(--accent); }
+    .counter-display {
+      font-size: 14px;
+      font-weight: 700;
+      font-family: 'DM Mono', monospace;
+      color: var(--text);
+      min-width: 28px;
+      text-align: center;
+    }
+    .counter-display.complete { color: var(--accent); }
+
+    /* ── Tip button ── */
+    .ex-tip-btn {
+      font-size: 11px; padding: 4px 9px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border2);
+      background: none;
+      cursor: pointer;
+      color: var(--text2);
+      font-family: 'DM Mono', monospace;
+      transition: all 0.12s;
+      white-space: nowrap;
+    }
+    .ex-tip-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Tip box ── */
+    .tip-box {
+      background: color-mix(in srgb, var(--accent) 8%, transparent);
+      border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      margin-top: 1rem;
+      display: none;
+    }
+    .tip-box.visible { display: block; }
+    .tip-box p { font-size: 13px; color: var(--text2); line-height: 1.6; }
+    .tip-box strong { color: var(--accent); }
+
+    /* ── Muscles ── */
+    .muscles-section { margin-top: 1.25rem; }
+    .muscles-title { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; font-family: 'DM Mono', monospace; }
+    .muscle-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .muscle-tag {
+      font-size: 11px; padding: 3px 10px;
+      border-radius: 999px;
+      font-family: 'DM Mono', monospace;
+    }
+    .muscle-primary { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); }
+    .muscle-secondary { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+
+    /* ── Science Tab ── */
+    .science-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+    .sci-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+    .sci-icon { font-size: 22px; margin-bottom: 8px; color: var(--accent); }
+    .sci-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .sci-body { font-size: 12px; color: var(--text2); line-height: 1.6; }
+    .sci-highlight { font-size: 12px; font-weight: 700; color: var(--accent); margin-top: 8px; font-family: 'DM Mono', monospace; }
+
+    /* ── Volume Tab ── */
+    .vol-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+    .vol-title { font-size: 14px; font-weight: 700; margin-bottom: 1rem; }
+    .prog-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .prog-label { font-size: 12px; color: var(--text2); min-width: 110px; font-family: 'DM Mono', monospace; }
+    .prog-bar-bg { flex: 1; height: 5px; background: var(--surface2); border-radius: 999px; }
+    .prog-bar-fill { height: 100%; border-radius: 999px; background: var(--accent); }
+    .prog-val { font-size: 12px; font-weight: 700; color: var(--text); min-width: 50px; text-align: right; font-family: 'DM Mono', monospace; }
+
+    /* ── Ask Buttons ── */
+    .ask-btn-row { margin-top: 1.25rem; display: flex; gap: 6px; flex-wrap: wrap; }
+    .ask-btn {
+      font-size: 12px; padding: 7px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border2);
+      background: none;
+      cursor: pointer;
+      color: var(--text2);
+      font-family: 'DM Mono', monospace;
+      transition: all 0.12s;
+    }
+    .ask-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--accent);
+      color: #0d0d0d;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 10px 20px;
+      border-radius: 999px;
+      opacity: 0;
+      transition: all 0.3s;
+      pointer-events: none;
+      font-family: 'Syne', sans-serif;
+      z-index: 100;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 620px) {
+      .week-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats-row { grid-template-columns: repeat(3, 1fr); }
+      .exercise-row,
+      .ex-table-header { grid-template-columns: 1fr 60px 50px 80px; }
+      .ex-table-header span:nth-child(2) { display: none; }
+      .exercise-row > .ex-val:first-of-type { display: none; }
+      .streak-calendar { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h1><i class="ti ti-barbell" style="margin-right:8px;color:var(--accent)"></i>Home Gym <span>Trainer</span></h1>
+      <p>4-day hypertrophy split · Dumbbells, Bands, Bodyweight</p>
+    </div>
+  </div>
+
+  <!-- Streak Banner -->
+  <div class="streak-banner">
+    <div class="streak-item">
+      <div>
+        <div class="streak-num fire" id="current-streak">0</div>
+        <div class="streak-label">Current<br>streak 🔥</div>
+      </div>
+    </div>
+    <div class="streak-divider"></div>
+    <div class="streak-item">
+      <div>
+        <div class="streak-num" id="longest-streak" style="color:var(--text2)">0</div>
+        <div class="streak-label">Longest<br>streak</div>
+      </div>
+    </div>
+    <div class="streak-divider"></div>
+    <div class="streak-item">
+      <div>
+        <div class="streak-num" id="total-workouts" style="color:var(--text2)">0</div>
+        <div class="streak-label">Total<br>workouts</div>
+      </div>
+    </div>
+    <div class="streak-calendar" id="streak-calendar" title="Last 14 days"></div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Training days</div>
+      <div class="stat-val">4</div>
+      <div class="stat-sub">per week</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Sets / session</div>
+      <div class="stat-val">16–20</div>
+      <div class="stat-sub">~45–60 min</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Rep range</div>
+      <div class="stat-val">8–15</div>
+      <div class="stat-sub">hypertrophy zone</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('schedule', this)">Schedule</button>
+    <button class="tab" onclick="switchTab('science', this)">Science</button>
+    <button class="tab" onclick="switchTab('volume', this)">Volume</button>
+  </div>
+
+  <!-- SCHEDULE TAB -->
+  <div id="tab-schedule" class="section active">
+    <div class="week-grid" id="week-grid"></div>
+
+    <div class="detail-panel">
+      <div class="detail-header">
+        <div>
+          <div class="detail-title" id="detail-title">Day 1 — Push</div>
+          <div class="detail-meta" id="detail-meta"></div>
+        </div>
+        <button class="complete-day-btn" id="complete-btn" onclick="completeDay()">
+          <i class="ti ti-check"></i> Mark Done
+        </button>
+      </div>
+
+      <div class="ex-table-header">
+        <span>Exercise</span>
+        <span>Sets</span>
+        <span>Reps</span>
+        <span>Counter</span>
+        <span></span>
+      </div>
+
+      <div class="exercises-list" id="exercises-list"></div>
+
+      <div id="tip-box" class="tip-box"></div>
+
+      <div class="muscles-section">
+        <div class="muscles-title">Muscles trained</div>
+        <div class="muscle-tags" id="muscle-tags"></div>
+      </div>
+
+      <div class="ask-btn-row" id="ask-btns"></div>
+    </div>
+  </div>
+
+  <!-- SCIENCE TAB -->
+  <div id="tab-science" class="section">
+    <div class="science-cards">
+      <div class="sci-card">
+        <div class="sci-icon"><i class="ti ti-chart-line"></i></div>
+        <div class="sci-title">Progressive overload</div>
+        <div class="sci-body">The primary driver of muscle growth. Each week, aim to add 1 rep per set before increasing weight. This ensures continuous adaptation.</div>
+        <div class="sci-highlight">+1 rep → then +2.5 kg</div>
+      </div>
+      <div class="sci-card">
+        <div class="sci-icon"><i class="ti ti-repeat"></i></div>
+        <div class="sci-title">Frequency & volume</div>
+        <div class="sci-body">Research (Schoenfeld, 2017) shows hitting each muscle 2× per week with 10–20 weekly sets is optimal for hypertrophy. Push/Pull/Legs + Upper achieves this.</div>
+        <div class="sci-highlight">10–20 sets/muscle/week</div>
+      </div>
+      <div class="sci-card">
+        <div class="sci-icon"><i class="ti ti-zzz"></i></div>
+        <div class="sci-title">Rest periods</div>
+        <div class="sci-body">For hypertrophy, 90–180 seconds between sets is evidence-based. Longer rests (2–3 min) allow better performance on compound movements.</div>
+        <div class="sci-highlight">2 min compounds · 90s isolation</div>
+      </div>
+      <div class="sci-card">
+        <div class="sci-icon"><i class="ti ti-moon"></i></div>
+        <div class="sci-title">Recovery & sleep</div>
+        <div class="sci-body">Muscle protein synthesis peaks 24–48h post-workout. 7–9h sleep raises GH & testosterone, directly accelerating hypertrophy.</div>
+        <div class="sci-highlight">7–9 hrs sleep nightly</div>
+      </div>
+      <div class="sci-card">
+        <div class="sci-icon"><i class="ti ti-meat"></i></div>
+        <div class="sci-title">Protein intake</div>
+        <div class="sci-body">Meta-analyses (Morton, 2018) show ~1.6–2.2g/kg bodyweight/day maximizes muscle protein synthesis. Spread across 3–5 meals.</div>
+        <div class="sci-highlight">1.6–2.2 g/kg bodyweight/day</div>
+      </div>
+      <div class="sci-card">
+        <div class="sci-icon"><i class="ti ti-angle"></i></div>
+        <div class="sci-title">Range of motion</div>
+        <div class="sci-body">Training through full ROM produces greater hypertrophy than partial reps (Pedrosa, 2022). Focus on the stretch position.</div>
+        <div class="sci-highlight">Full stretch = max stimulus</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VOLUME TAB -->
+  <div id="tab-volume" class="section">
+    <div class="vol-card">
+      <div class="vol-title">Weekly sets per muscle group</div>
+      <div class="prog-row"><span class="prog-label">Chest</span><div class="prog-bar-bg"><div class="prog-bar-fill" style="width:70%"></div></div><span class="prog-val">14 sets</span></div>
+      <div class="prog-row"><span class="prog-label">Back</span><div class="prog-bar-bg"><div class="prog-bar-fill" style="width:75%"></div></div><span class="prog-val">15 sets</span></div>
+      <div class="prog-row"><span class="prog-label">Shoulders</span><div class="prog-bar-bg"><div class="prog-bar-fill" style="width:55%"></div></div><span class="prog-val">11 sets</span></div>
+      <div class="prog-row"><span class="prog-label">Biceps</span><div class="prog-bar-bg"><div class="prog-bar-fill" style="width:55%"></div></div><span class="prog-val">11 sets</span></div>
+      <div class="prog-row"><span class="prog-label">Triceps</span><div class="prog-bar-bg"><div class="prog-bar-fill" style="width:60%"></div></div><span class="prog-val">12 sets</span></div>
+      <div class="prog-row"><span class="prog-label">Quads</span><div class="prog-bar-bg"><div class="prog-bar-fill" style="width:65%"></div></div><span class="prog-val">13 sets</span></div>
+      <div class="prog-row"><span class="prog-label">Hamstrings</span><div class="prog-bar-bg"><div class="prog-bar-fill" style="width:50%"></div></div><span class="prog-val">10 sets</span></div>
+      <div class="prog-row"><span class="prog-label">Glutes</span><div class="prog-bar-bg"><div class="prog-bar-fill" style="width:55%"></div></div><span class="prog-val">11 sets</span></div>
+      <div class="prog-row"><span class="prog-label">Calves</span><div class="prog-bar-bg"><div class="prog-bar-fill" style="width:45%"></div></div><span class="prog-val">9 sets</span></div>
+      <div class="prog-row"><span class="prog-label">Core</span><div class="prog-bar-bg"><div class="prog-bar-fill" style="width:40%"></div></div><span class="prog-val">8 sets</span></div>
+      <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">
+        Optimal hypertrophy range: 10–20 sets per muscle group per week.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────────
+const DAYS = [
+  {
+    title: "Day 1 — Push", color: "var(--push)",
+    meta: "Chest, Shoulders, Triceps · 5 exercises · ~50 min",
+    badge: "Chest · Shoulders · Triceps",
+    muscles: { primary: ["Chest","Anterior delts","Triceps"], secondary: ["Lateral delts","Serratus anterior"] },
+    exercises: [
+      { name:"Dumbbell floor press", equip:"Dumbbells", sets:4, reps:"8–12", tip:"Keep elbows at 45° from your torso to protect your shoulders. Pause at the bottom for 1 second to eliminate momentum and maximize chest stretch." },
+      { name:"Incline dumbbell press", equip:"Dumbbells (on floor/elevated)", sets:3, reps:"10–12", tip:"Use a folded mat or pillow to create ~30° incline. This angle maximally recruits the upper chest per EMG research." },
+      { name:"Resistance band chest fly", equip:"Resistance Bands", sets:3, reps:"12–15", tip:"Anchor band at chest height. The stretched position is where hypertrophy stimulus is highest — don't rush through it." },
+      { name:"Resistance band lateral raise", equip:"Resistance Bands", sets:3, reps:"12–15", tip:"Stand on the band. Raise arms to shoulder height, leading with your elbows. The band's rising resistance perfectly matches the lateral delt strength curve." },
+      { name:"Pike push-up", equip:"Bodyweight", sets:3, reps:"8–12", tip:"The more vertical your torso, the more it becomes a shoulder exercise. Elevate your feet on a surface to progress toward a handstand push-up." },
+      { name:"Diamond push-up", equip:"Bodyweight", sets:3, reps:"10–15", tip:"Place hands close under your sternum forming a diamond shape. This is one of the highest-activation triceps exercises available with bodyweight." },
+    ]
+  },
+  {
+    title: "Day 2 — Pull", color: "var(--pull)",
+    meta: "Back, Biceps, Rear Delts · 5 exercises · ~50 min",
+    badge: "Back · Biceps · Rear Delts",
+    muscles: { primary: ["Lats","Rhomboids","Biceps"], secondary: ["Rear delts","Traps","Brachialis"] },
+    exercises: [
+      { name:"Dumbbell bent-over row", equip:"Dumbbells", sets:4, reps:"8–12", tip:"Hinge to ~45°, pull the dumbbell to your hip (not your chest). Think about driving your elbow back and squeezing your shoulder blade at the top." },
+      { name:"Resistance band pull-apart", equip:"Resistance Bands", sets:3, reps:"15–20", tip:"Hold band at shoulder width, arms straight. Pull apart until arms are fully extended sideways. This directly targets the rear delts and mid-traps." },
+      { name:"Dumbbell single-arm row", equip:"Dumbbells", sets:3, reps:"10–12 each", tip:"Use a chair or wall for support. Allow full stretch at the bottom — research shows the stretched position generates more hypertrophy in the lats." },
+      { name:"Resistance band face pull", equip:"Resistance Bands", sets:3, reps:"15–20", tip:"Anchor band at face height. Pull toward your face with elbows high and flared. Essential for shoulder health and rear delt development." },
+      { name:"Dumbbell hammer curl", equip:"Dumbbells", sets:3, reps:"10–15", tip:"Neutral grip (thumbs up). This hits the brachialis underneath the bicep, which pushes the bicep up — key for arm thickness and peak." },
+    ]
+  },
+  {
+    title: "Day 3 — Legs", color: "var(--legs)",
+    meta: "Quads, Hamstrings, Glutes, Calves · 5 exercises · ~55 min",
+    badge: "Quads · Hams · Glutes · Calves",
+    muscles: { primary: ["Quadriceps","Glutes","Hamstrings"], secondary: ["Calves","Core","Hip flexors"] },
+    exercises: [
+      { name:"Dumbbell goblet squat", equip:"Dumbbells", sets:4, reps:"10–15", tip:"Hold one dumbbell vertically at your chest. This counterbalance allows an upright torso, maximizing quad recruitment. Go as deep as possible." },
+      { name:"Dumbbell Romanian deadlift", equip:"Dumbbells", sets:4, reps:"10–12", tip:"Hinge at the hips, keeping dumbbells close to your legs. Feel a deep hamstring stretch at the bottom before driving hips forward. Do NOT round your lower back." },
+      { name:"Bulgarian split squat", equip:"Bodyweight / Dumbbells", sets:3, reps:"10–12 each", tip:"Rear foot elevated on a chair. Lean torso slightly forward to emphasize glutes, or stay upright for quads." },
+      { name:"Resistance band hip thrust", equip:"Resistance Bands", sets:3, reps:"15–20", tip:"Lie on your back, knees bent, band across hips. Drive hips up and squeeze glutes hard at the top for 1 second. Best glute builder available without a barbell." },
+      { name:"Single-leg calf raise", equip:"Bodyweight", sets:4, reps:"15–20 each", tip:"Stand on the edge of a step for full range of motion. The gastrocnemius is best hit with a straight knee. Pause at the bottom stretch." },
+    ]
+  },
+  {
+    title: "Day 4 — Upper", color: "var(--upper)",
+    meta: "Full Upper Body Re-stimulus · 5 exercises · ~50 min",
+    badge: "Full upper body re-stimulus",
+    muscles: { primary: ["Chest","Back","Shoulders","Biceps","Triceps"], secondary: ["Core","Rear delts"] },
+    exercises: [
+      { name:"Push-up (weighted/elevated)", equip:"Bodyweight / Resistance Bands", sets:4, reps:"10–20", tip:"Add a resistance band across your back for extra load. Or elevate your feet to shift emphasis to the upper chest. Always go to full arm extension." },
+      { name:"Dumbbell chest-supported row", equip:"Dumbbells", sets:4, reps:"10–15", tip:"Lie chest-down on an elevated surface (chair, bed edge). This eliminates lower back stress entirely. Best way to isolate the back with dumbbells." },
+      { name:"Dumbbell shoulder press", equip:"Dumbbells", sets:3, reps:"10–12", tip:"Seated on a chair for stability. Press dumbbells from ear height up. Don't fully lock out at the top — keep tension on the delts throughout." },
+      { name:"Resistance band bicep curl", equip:"Resistance Bands", sets:3, reps:"12–15", tip:"Stand on the band, palms facing up. Bands provide increasing resistance as you curl — the peak contraction is harder than with dumbbells." },
+      { name:"Tricep overhead extension", equip:"Dumbbells", sets:3, reps:"10–15", tip:"Hold one dumbbell overhead with both hands. Lower behind your head, keeping elbows close. The long head of the tricep is only fully stretched in this overhead position." },
+    ]
+  }
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let currentDay = 0;
+let currentTip = null;
+
+// Storage helpers
+function saveState(key, val) {
+  try { localStorage.setItem('hgt_' + key, JSON.stringify(val)); } catch(e) {}
+}
+function loadState(key, def) {
+  try {
+    const v = localStorage.getItem('hgt_' + key);
+    return v !== null ? JSON.parse(v) : def;
+  } catch(e) { return def; }
+}
+
+// Counter state: { "day-exIdx": count }
+let counters = loadState('counters', {});
+// Completed workout dates: ["2025-01-20", ...]
+let completedDates = loadState('completedDates', []);
+
+function todayStr() {
+  return new Date().toISOString().split('T')[0];
+}
+
+// ── Streak Calculations ────────────────────────────────────────────────────────
+function calcStreaks() {
+  const sorted = [...new Set(completedDates)].sort();
+  if (!sorted.length) return { current: 0, longest: 0, total: 0 };
+
+  let longest = 1, run = 1;
+  for (let i = 1; i < sorted.length; i++) {
+    const prev = new Date(sorted[i-1]), cur = new Date(sorted[i]);
+    const diff = (cur - prev) / 86400000;
+    if (diff === 1) { run++; if (run > longest) longest = run; }
+    else run = 1;
+  }
+
+  // Current streak: count backwards from today/yesterday
+  const today = todayStr();
+  const todayDate = new Date(today);
+  let current = 0;
+  let check = new Date(todayDate);
+  while (true) {
+    const d = check.toISOString().split('T')[0];
+    if (sorted.includes(d)) { current++; check.setDate(check.getDate() - 1); }
+    else break;
+  }
+
+  return { current, longest: Math.max(longest, current), total: sorted.length };
+}
+
+function updateStreakUI() {
+  const { current, longest, total } = calcStreaks();
+  document.getElementById('current-streak').textContent = current;
+  document.getElementById('longest-streak').textContent = longest;
+  document.getElementById('total-workouts').textContent = total;
+
+  // Calendar dots (last 14 days)
+  const cal = document.getElementById('streak-calendar');
+  cal.innerHTML = '';
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const ds = d.toISOString().split('T')[0];
+    const dot = document.createElement('div');
+    dot.className = 'streak-dot';
+    if (completedDates.includes(ds)) dot.classList.add('done');
+    if (i === 0) dot.classList.add('today');
+    dot.title = ds;
+    cal.appendChild(dot);
+  }
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderWeekGrid() {
+  const grid = document.getElementById('week-grid');
+  grid.innerHTML = DAYS.map((d, i) => {
+    const isDone = isTodayDone(i);
+    return `<div class="day-card ${i === currentDay ? 'active' : ''} ${isDone ? 'completed' : ''}"
+      style="--day-color:${d.color}"
+      onclick="selectDay(${i})">
+      <div class="day-label">Day ${i+1}</div>
+      <div class="day-name">${d.title.split('—')[1].trim()}</div>
+      <div class="day-badge">${d.badge}</div>
+      <div class="day-complete-badge"><i class="ti ti-circle-check"></i> Done today</div>
+    </div>`;
+  }).join('');
+}
+
+function isTodayDone(dayIdx) {
+  return completedDates.includes(todayStr() + '-d' + dayIdx);
+}
+
+function renderDay(idx) {
+  const day = DAYS[idx];
+  document.getElementById('detail-title').textContent = day.title;
+  document.getElementById('detail-meta').textContent = day.meta;
+
+  const list = document.getElementById('exercises-list');
+  list.innerHTML = day.exercises.map((ex, i) => {
+    const key = `${idx}-${i}`;
+    const count = counters[key] || 0;
+    const done = count >= ex.sets;
+    return `<div class="exercise-row ${done ? 'all-done' : ''}" id="exrow-${idx}-${i}">
+      <div>
+        <div class="ex-name">${ex.name}</div>
+        <div class="ex-equip">${ex.equip}</div>
+      </div>
+      <div class="ex-val">${ex.sets} sets</div>
+      <div class="ex-val">${ex.reps}</div>
+      <div class="set-counter">
+        <button class="counter-btn minus" onclick="adjustCounter(${idx},${i},-1)" title="Remove set">−</button>
+        <div class="counter-display ${done ? 'complete' : ''}" id="cnt-${idx}-${i}">${count}/${ex.sets}</div>
+        <button class="counter-btn plus" onclick="adjustCounter(${idx},${i},1)" title="Add set">+</button>
+      </div>
+      <div><button class="ex-tip-btn" onclick="showTip(${i})" id="tipbtn-${i}">
+        <i class="ti ti-bulb" style="font-size:10px;margin-right:2px"></i>Tip
+      </button></div>
+    </div>`;
+  }).join('');
+
+  // Muscles
+  const tags = document.getElementById('muscle-tags');
+  tags.innerHTML =
+    day.muscles.primary.map(m => `<span class="muscle-tag muscle-primary">${m}</span>`).join('') +
+    day.muscles.secondary.map(m => `<span class="muscle-tag muscle-secondary">${m}</span>`).join('');
+
+  // Tip box
+  document.getElementById('tip-box').classList.remove('visible');
+  currentTip = null;
+
+  // Complete button
+  const btn = document.getElementById('complete-btn');
+  const done = isTodayDone(idx);
+  if (done) {
+    btn.innerHTML = '<i class="ti ti-circle-check"></i> Completed!';
+    btn.classList.add('done');
+  } else {
+    btn.innerHTML = '<i class="ti ti-check"></i> Mark Done';
+    btn.classList.remove('done');
+  }
+
+  // Ask buttons
+  const dayName = day.title.split('—')[1].trim();
+  document.getElementById('ask-btns').innerHTML = [
+    `<button class="ask-btn" onclick="sendPrompt('Can you give me a progression plan for ${dayName} day?')">Progression plan ↗</button>`,
+    `<button class="ask-btn" onclick="sendPrompt('What are substitutions if an exercise on ${day.title} is too easy or hard?')">Substitutions ↗</button>`,
+    `<button class="ask-btn" onclick="sendPrompt('How should I warm up before ${day.title}?')">Warm-up ↗</button>`
+  ].join('');
+}
+
+// ── Interactions ──────────────────────────────────────────────────────────────
+function selectDay(idx) {
+  currentDay = idx;
+  renderWeekGrid();
+  renderDay(idx);
+}
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  el.classList.add('active');
+}
+
+function adjustCounter(dayIdx, exIdx, delta) {
+  const key = `${dayIdx}-${exIdx}`;
+  const ex = DAYS[dayIdx].exercises[exIdx];
+  const prev = counters[key] || 0;
+  const next = Math.max(0, Math.min(ex.sets + 2, prev + delta));
+  counters[key] = next;
+  saveState('counters', counters);
+
+  const done = next >= ex.sets;
+  const display = document.getElementById(`cnt-${dayIdx}-${exIdx}`);
+  if (display) {
+    display.textContent = `${next}/${ex.sets}`;
+    display.classList.toggle('complete', done);
+  }
+  const row = document.getElementById(`exrow-${dayIdx}-${exIdx}`);
+  if (row) row.classList.toggle('all-done', done);
+
+  if (done) showToast(`Set ${next}/${ex.sets} — ${ex.name.split(' ').slice(0,2).join(' ')} done! 💪`);
+}
+
+function completeDay() {
+  const key = todayStr() + '-d' + currentDay;
+  if (completedDates.includes(key)) return;
+  completedDates.push(key);
+  saveState('completedDates', completedDates);
+  updateStreakUI();
+  renderWeekGrid();
+  renderDay(currentDay);
+  showToast('🔥 Workout logged! Streak updated!');
+}
+
+function showTip(idx) {
+  const tipBox = document.getElementById('tip-box');
+  if (currentTip === idx) { tipBox.classList.remove('visible'); currentTip = null; return; }
+  currentTip = idx;
+  const tip = DAYS[currentDay].exercises[idx].tip;
+  tipBox.innerHTML = `<p><strong>Coaching tip:</strong> ${tip}</p>`;
+  tipBox.classList.add('visible');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+updateStreakUI();
+renderWeekGrid();
+renderDay(0);
+</script>
+</body>
+</html>
